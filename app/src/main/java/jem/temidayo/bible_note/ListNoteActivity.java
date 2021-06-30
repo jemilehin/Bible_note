@@ -4,13 +4,23 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ListNoteActivity extends AppCompatActivity {
+
+    private List<BibleNote> bibleNotes = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private NoteListRecyclerAdapter noteListRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +37,19 @@ public class ListNoteActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        initiateView();
     }
+
+    private void initiateView() {
+        recyclerView = (RecyclerView) findViewById(R.id.note_recyclerview);
+        noteListRecyclerAdapter = new NoteListRecyclerAdapter(bibleNotes);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(noteListRecyclerAdapter);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,6 +57,8 @@ public class ListNoteActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
