@@ -12,16 +12,19 @@ import java.util.List;
 
 public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecyclerAdapter.ViewHolder> {
 
-    private List<BibleNote> bibleNotelist;
+    private final List<BibleNote> bibleNotelist;
+    private final Context mContext;
+    private final LayoutInflater mLayoutInflater;
 
-    public NoteListRecyclerAdapter(List<BibleNote> bibleNotes) {
+    public NoteListRecyclerAdapter(Context context, List<BibleNote> bibleNotes) {
+        mContext = context;
         bibleNotelist = bibleNotes;
+        mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_note_item, parent, false);
+        View view = mLayoutInflater.inflate(R.layout.list_note_item, parent, false);
 
         return new ViewHolder(view);
     }
@@ -32,6 +35,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         holder.nTitle.setText(bibleNote.getnTitle());
         holder.nText.setText(bibleNote.getnText());
         holder.pName.setText(bibleNote.getpName());
+        holder.mCurrentPosition =  holder.getAdapterPosition();
     }
 
     @Override
@@ -42,11 +46,12 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView nTitle, nText, pName;
+        public int mCurrentPosition;
         public ViewHolder(View view) {
             super(view);
             nTitle = (TextView) view.findViewById(R.id.note_title_text);
             nText = (TextView)  view.findViewById(R.id.note_bible_text);
-//            pName = (TextView) view.findViewById(R.id.pname);
+            pName = (TextView) view.findViewById(R.id.preacher_name);
         }
     }
 }

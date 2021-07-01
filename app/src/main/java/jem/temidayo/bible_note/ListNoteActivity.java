@@ -13,13 +13,12 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListNoteActivity extends AppCompatActivity {
 
-    private List<BibleNote> bibleNotes = new ArrayList<>();
-    private RecyclerView recyclerView;
+//    private List<BibleNote> bibleNotes = new ArrayList<>();
+    private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
 
     @Override
@@ -42,12 +41,14 @@ public class ListNoteActivity extends AppCompatActivity {
     }
 
     private void initiateView() {
-        recyclerView = (RecyclerView) findViewById(R.id.note_recyclerview);
-        noteListRecyclerAdapter = new NoteListRecyclerAdapter(bibleNotes);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(noteListRecyclerAdapter);
+        recyclerNotes = (RecyclerView) findViewById(R.id.note_recyclerview);
+        final LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
+        recyclerNotes.setLayoutManager(noteLayoutManager);
+
+        List<BibleNote> notes = NoteManager.getNoteInstance().getNotes();
+        noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, notes);
+        recyclerNotes.setItemAnimator(new DefaultItemAnimator());
+        recyclerNotes.setAdapter(noteListRecyclerAdapter);
     }
 
 
@@ -68,7 +69,7 @@ public class ListNoteActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_backward) {
             return true;
         }
 
