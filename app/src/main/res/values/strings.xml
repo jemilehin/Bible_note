@@ -12,4 +12,9 @@
     <string name="note_text">This is a text view note.</string>
     <string name="note_icon">Note Icon</string>
     <string name="action_search">Search</string>
+    <string name="edit_preacher_name">Sermoner\'s Name</string>
+    <string name="edit_text_title_holder">Bible Note Title</string>
+    <string name="edit_text_note_label">Type Notes Here</string>
+    <string name="save_note_button_text">Save</string>
+    <string name="cancle_note_button_text">Cancle</string>
 </resources>

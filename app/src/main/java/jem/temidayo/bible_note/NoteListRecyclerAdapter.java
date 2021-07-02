@@ -2,6 +2,7 @@ package jem.temidayo.bible_note;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +44,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         return bibleNotelist.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView nTitle, nText, pName;
         public int mCurrentPosition;
@@ -52,6 +53,15 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
             nTitle = (TextView) view.findViewById(R.id.note_title_text);
             nText = (TextView)  view.findViewById(R.id.note_bible_text);
             pName = (TextView) view.findViewById(R.id.preacher_name);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, NewBibleNoteActivity.class);
+                    intent.putExtra(NewBibleNoteActivity.NOTE_POSITION, mCurrentPosition);
+                    mContext.startActivity(intent);
+                }
+            });
         }
     }
 }
