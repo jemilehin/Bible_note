@@ -21,6 +21,12 @@ public class NoteManager {
         return notes;
     }
 
+    public int createNewNote(){
+        BibleNote note = new BibleNote(null,null,null);
+        notes.add(note);
+        return notes.size() - 1;
+    }
+
     private void intilizeExampleNotes() {
         final NoteManager nm = getNoteInstance();
         notes.add(new BibleNote("Mr Isreal",
