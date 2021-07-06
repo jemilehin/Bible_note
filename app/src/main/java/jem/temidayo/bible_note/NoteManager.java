@@ -113,4 +113,8 @@ public class NoteManager {
                         "Example: Gen 3:1-4"
         ));
     }
+
+    public void removeNote(int index) {
+        notes.remove(index);
+    }
 }
