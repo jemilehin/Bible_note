@@ -22,15 +22,11 @@ public class NewBibleNoteActivity extends AppCompatActivity {
     private EditText mPreacherName, mNoteTitle, mNoteText;
     private String mPutPreacherName, mPutNoteTitle, mPutNoteText;
     private boolean mIsNewNote;
+    private boolean mIsCancelling;
     private int mNotePosition;
     private BibleNote mNote;
     private MenuItem menu;
     private Button sButton, cButton;
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +35,11 @@ public class NewBibleNoteActivity extends AppCompatActivity {
 
 
         readDisplayStateValues();
+        if(savedInstanceState == null){
+            saveNoteValues();
+        }else{
+            restoreOriginalNoteValues(savedInstanceState);
+        }
 
         mPreacherName = findViewById(R.id.edit_text_pname);
         mNoteTitle = findViewById(R.id.edit_text_title);
@@ -60,9 +61,15 @@ public class NewBibleNoteActivity extends AppCompatActivity {
         cButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                finish();
             }
         });
+    }
+
+    private void restoreOriginalNoteValues(Bundle savedInstanceState) {
+        mPutPreacherName = savedInstanceState.getString(BIBLE_NOTE_PREACHER);
+        mPutNoteTitle = savedInstanceState.getString(BIBLE_NOTE_TITLE);
+        mPutNoteText = savedInstanceState.getString(BIBLE_NOTE_TEXT);
     }
 
     private void readDisplayStateValues() {
@@ -73,6 +80,24 @@ public class NewBibleNoteActivity extends AppCompatActivity {
             createNewNote();
 //        Log.i(TAG, "mNotePosition: " + mNote);
         mNote = NoteManager.getNoteInstance().getNotes().get(mNotePosition);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mIsCancelling){
+            if(mIsNewNote){
+                NoteManager.getNoteInstance().removeNote(mNotePosition);
+            }else{
+                storePreviousNoteValues();
+            }
+        }
+    }
+
+    private void storePreviousNoteValues() {
+        mNote.setpName(mPutPreacherName);
+        mNote.setnTitle(mPutNoteTitle);
+        mNote.setnText(mPutNoteText);
     }
 
     @Override
@@ -100,13 +125,13 @@ public class NewBibleNoteActivity extends AppCompatActivity {
         mNoteText.setText(mNote.getnText());
     }
 
-//    private void saveNoteValues(){
-//        if(mIsNewNote)
-//            return;
-//        mPutPreacherName = mNote.getpName();
-//        mPutNoteTitle = mNote.getnTitle();
-//        mPutNoteText = mNote.getnText();
-//    }
+    private void saveNoteValues(){
+        if(mIsNewNote)
+            return;
+        mPutPreacherName = mNote.getpName();
+        mPutNoteTitle = mNote.getnTitle();
+        mPutNoteText = mNote.getnText();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
