@@ -48,17 +48,20 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
 
         public TextView nTitle, nText, pName;
         public int mCurrentPosition;
+        public View viewForeground;
+
         public ViewHolder(View view) {
             super(view);
             nTitle = (TextView) view.findViewById(R.id.note_title_text);
             nText = (TextView)  view.findViewById(R.id.note_bible_text);
             pName = (TextView) view.findViewById(R.id.preacher_name);
+//            viewForeground = view.findViewById(R.id.view_foreground);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, NewBibleNoteActivity.class);
-                    intent.putExtra(NewBibleNoteActivity.NOTE_POSITION, mCurrentPosition);
+                    Intent intent = new Intent(mContext, BibleNoteActivity.class);
+                    intent.putExtra(BibleNoteActivity.NOTE_POSITION, mCurrentPosition);
                     mContext.startActivity(intent);
                 }
             });
