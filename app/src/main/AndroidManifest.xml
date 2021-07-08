@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bible_note">
-        <activity android:name=".NewBibleNoteActivity"></activity>
+        <activity android:name=".BibleNoteActivity"></activity>
         <activity
             android:name=".ListNoteActivity"
             android:label="@string/app_name"

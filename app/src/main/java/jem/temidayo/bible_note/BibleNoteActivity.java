@@ -12,7 +12,7 @@ import android.widget.EditText;
 
 import java.util.List;
 
-public class NewBibleNoteActivity extends AppCompatActivity {
+public class BibleNoteActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
     public static  final String NOTE_POSITION = "jem.temidayo.bible_note.NOTE_POSITION";
     public static final String BIBLE_NOTE_PREACHER = "jem.temidayo.bible_note.BIBLE_NOTE_PREACHER";
@@ -54,6 +54,7 @@ public class NewBibleNoteActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 saveNote();
+                startActivity(new Intent(BibleNoteActivity.this, ListNoteActivity.class));
             }
         });
 

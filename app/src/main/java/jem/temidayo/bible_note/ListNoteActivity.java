@@ -3,7 +3,6 @@ package jem.temidayo.bible_note;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,7 +32,7 @@ public class ListNoteActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ListNoteActivity.this, NewBibleNoteActivity.class);
+                Intent intent = new Intent(ListNoteActivity.this, BibleNoteActivity.class);
                 startActivity(intent);
             }
         });
@@ -52,7 +51,6 @@ public class ListNoteActivity extends AppCompatActivity {
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -60,7 +58,11 @@ public class ListNoteActivity extends AppCompatActivity {
         return true;
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        noteListRecyclerAdapter.notifyDataSetChanged();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
