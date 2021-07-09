@@ -8,6 +8,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 
 import android.view.Menu;
@@ -15,11 +17,11 @@ import android.view.MenuItem;
 
 import java.util.List;
 
-public class ListNoteActivity extends AppCompatActivity {
-
-//    private List<BibleNote> bibleNotes = new ArrayList<>();
+public class ListNoteActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
     private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
+    private List<BibleNote> mNotes;
+    private static final String TAG = ListNoteActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +47,14 @@ public class ListNoteActivity extends AppCompatActivity {
         final LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
         recyclerNotes.setLayoutManager(noteLayoutManager);
 
-        List<BibleNote> notes = NoteManager.getNoteInstance().getNotes();
-        noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, notes);
+        mNotes = NoteManager.getNoteInstance().getNotes();
+        noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, mNotes);
         recyclerNotes.setItemAnimator(new DefaultItemAnimator());
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
+
+        ItemTouchHelper.SimpleCallback itemTouchCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, this);
+        new ItemTouchHelper(itemTouchCallback).attachToRecyclerView(recyclerNotes);
+
     }
 
     @Override
@@ -77,5 +83,31 @@ public class ListNoteActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if (viewHolder instanceof NoteListRecyclerAdapter.ViewHolder) {
+            // get the removed item name to display it in snack bar
+//            String name = mNotes.get(viewHolder.getAdapterPosition()).getnTitle();
+
+            // backup of removed item for undo purpose
+//            final BibleNote deletedItem = cartList.get(viewHolder.getAdapterPosition());
+//            final int deletedIndex = viewHolder.getAdapterPosition();
+            Log.d(TAG, "the id:"+ viewHolder.getItemId());
+
+            // remove the item from recycler view
+            noteListRecyclerAdapter.removeItem(viewHolder.getAdapterPosition());
+
+            // showing snack bar with Undo option
+//            Snackbar snackbar = Snackbar
+//                    .make(coordinatorLayout, name + " removed from cart!", Snackbar.LENGTH_LONG);
+//            snackbar.setAction("UNDO", new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+
+            // undo is selected, restore the deleted item
+//                    mAdapter.restoreItem(deletedItem, deletedIndex);
+        }
     }
 }
