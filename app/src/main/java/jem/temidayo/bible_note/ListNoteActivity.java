@@ -32,6 +32,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mOpenHelper = new DatabaseOpenHelper(this);
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
