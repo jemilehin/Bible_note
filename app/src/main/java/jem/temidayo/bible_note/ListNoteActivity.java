@@ -1,6 +1,7 @@
 package jem.temidayo.bible_note;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,7 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
     private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
     private List<BibleNote> mNotes;
+    private DatabaseOpenHelper mOpenHelper;
     private static final String TAG = ListNoteActivity.class.getSimpleName();
 
     @Override
@@ -29,6 +31,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mOpenHelper = new DatabaseOpenHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -42,6 +46,12 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         initiateView();
     }
 
+    @Override
+    protected void onDestroy() {
+        mOpenHelper.close();
+        super.onDestroy();
+    }
+
     private void initiateView() {
         recyclerNotes = (RecyclerView) findViewById(R.id.note_recyclerview);
         final LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
@@ -51,6 +61,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, mNotes);
         recyclerNotes.setItemAnimator(new DefaultItemAnimator());
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
+
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         ItemTouchHelper.SimpleCallback itemTouchCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, this);
         new ItemTouchHelper(itemTouchCallback).attachToRecyclerView(recyclerNotes);
