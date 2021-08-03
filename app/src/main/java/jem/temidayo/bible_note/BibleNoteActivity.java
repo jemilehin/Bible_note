@@ -3,14 +3,11 @@ package jem.temidayo.bible_note;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.util.List;
 
 public class BibleNoteActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
@@ -80,7 +77,7 @@ public class BibleNoteActivity extends AppCompatActivity {
         if(mIsNewNote)
             createNewNote();
 //        Log.i(TAG, "mNotePosition: " + mNote);
-        mNote = NoteManager.getNoteInstance().getNotes().get(mNotePosition);
+        mNote = NoteManager.getNoteInstance().getmNotes().get(mNotePosition);
     }
 
     @Override
