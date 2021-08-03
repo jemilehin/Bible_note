@@ -3,21 +3,25 @@ package jem.temidayo.bible_note;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
 
+import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
+
 public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecyclerAdapter.ViewHolder>{
 
     private final List<BibleNote> bibleNotelist;
     private final Context mContext;
     private final LayoutInflater mLayoutInflater;
+//    private Cursor mCursor;
+    private int mBibleNotePos;
 //    private NoteListRecyclerAdapter mAdapter;
 
     public NoteListRecyclerAdapter(Context context, List<BibleNote> bibleNotes) {
@@ -83,6 +87,22 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         // NOTE: don't call notifyDataSetChanged()
         notifyItemRemoved(adapterPosition);
     }
+
+//    public void changeCursor(Cursor cursor) {
+//        if(mCursor != null){
+//            mCursor.close();
+//        }
+//        mCursor = cursor;
+//        populateColumnPosition();
+//        notifyDataSetChanged();
+//    }
+
+//    private void populateColumnPosition() {
+//        if(mCursor == null){
+//            return;
+//        }
+//        mBibleNotePos = mCursor.getColumnIndex(BibleNoteEntry._ID);
+//    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
