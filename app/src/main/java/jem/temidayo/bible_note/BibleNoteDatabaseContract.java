@@ -2,8 +2,8 @@ package jem.temidayo.bible_note;
 
 import android.provider.BaseColumns;
 
-public class BibleNoteDatabaseContract {
-    private  BibleNoteDatabaseContract() {}
+public final class BibleNoteDatabaseContract {
+    private BibleNoteDatabaseContract() {}
 
     public static final class BibleNoteEntry implements BaseColumns{
         public static final String TABLE_NAME = "bible_note";
