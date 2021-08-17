@@ -25,7 +25,6 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
     private List<BibleNote> mNotes;
     private DatabaseOpenHelper mOpenHelper;
     private static final String TAG = ListNoteActivity.class.getSimpleName();
-//    private BibleNoteOpenHelper mDbOpenHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
