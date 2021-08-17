@@ -22,10 +22,8 @@ import java.util.List;
 public class ListNoteActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
     private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
-    private List<BibleNote> mNotes;
-    private DatabaseOpenHelper mOpenHelper;
+    private BibleNoteOpenHelper mOpenHelper;
     private static final String TAG = ListNoteActivity.class.getSimpleName();
-//    private BibleNoteOpenHelper mDbOpenHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +32,7 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mOpenHelper = new DatabaseOpenHelper(this);
+        mOpenHelper = new BibleNoteOpenHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -55,28 +53,19 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
     }
 
     private void initiateView() {
+         NoteManager.loadFromDatabase(mOpenHelper);
         recyclerNotes = (RecyclerView) findViewById(R.id.note_recyclerview);
-        final LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
         recyclerNotes.setLayoutManager(noteLayoutManager);
 
-        mNotes = NoteManager.getNoteInstance().getmNotes();
+        List<BibleNote> mNotes = NoteManager.getNoteInstance().getNotes();
         noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, mNotes);
         recyclerNotes.setItemAnimator(new DefaultItemAnimator());
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
 
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-//        final String[] bibleNotes = {BibleNoteDatabaseContract.BibleNoteEntry.COLUMN_SERMONER,
-//                BibleNoteDatabaseContract.BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
-//                BibleNoteDatabaseContract.BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
-//                BibleNoteDatabaseContract.BibleNoteEntry._ID};
-
-//        String noteOrder = BibleNoteDatabaseContract.BibleNoteEntry._ID
-//            final Cursor noteCursor = db.query(BibleNoteDatabaseContract.BibleNoteEntry.TABLE_NAME, bibleNotes, null, null, null, null, null);
-
-//            noteListRecyclerAdapter.changeCursor(noteCursor);
-
         ItemTouchHelper.SimpleCallback itemTouchCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, this);
         new ItemTouchHelper(itemTouchCallback).attachToRecyclerView(recyclerNotes);
+
     }
 
     @Override

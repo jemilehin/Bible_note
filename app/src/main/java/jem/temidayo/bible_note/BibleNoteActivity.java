@@ -1,6 +1,8 @@
 package jem.temidayo.bible_note;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
 public class BibleNoteActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
@@ -24,12 +28,19 @@ public class BibleNoteActivity extends AppCompatActivity {
     private BibleNote mNote;
     private MenuItem menu;
     private Button sButton, cButton;
+    private BibleNoteOpenHelper mDbHelper;
+    private Cursor mBibleNoteCursor;
+    private int mNoteTitlePos;
+    private int mNoteTextPos;
+    private int mSermornerPos;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_bible_note_activity);
 
+        mDbHelper = new BibleNoteOpenHelper(this);
 
         readDisplayStateValues();
         if(savedInstanceState == null){
@@ -43,7 +54,7 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNoteText = findViewById(R.id.edit_text_note);
 
         if(!mIsNewNote){
-            displayNote(mPreacherName,mNoteTitle,mNoteText);
+            loadNoteData();
         }
 
         sButton = findViewById(R.id.save_note);
@@ -59,9 +70,42 @@ public class BibleNoteActivity extends AppCompatActivity {
         cButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mIsCancelling){
+                    if(mIsNewNote){
+                        
+                    }
+                }
                 finish();
             }
         });
+    }
+
+    private void loadNoteData() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        String noteTitle = "Serving God";
+        String noteTextStart = "God";
+//        int noteId = 2;
+
+        String selection = BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE + "= ? AND "
+                + BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT + " LIKE ? ";
+//        String selection = BibleNoteEntry._ID;
+        String[] selectionArgs = {noteTitle, noteTextStart + "%"};
+
+        String[] bibleNoteColumn= {
+                BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+                BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
+                BibleNoteEntry.COLUMN_SERMONER
+        };
+
+        mBibleNoteCursor = db.query(BibleNoteEntry.TABLE_NAME,bibleNoteColumn,selection, selectionArgs,
+                null, null, null);
+
+        mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
+        mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
+        mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
+
+        displayNote();
     }
 
     private void restoreOriginalNoteValues(Bundle savedInstanceState) {
@@ -77,7 +121,7 @@ public class BibleNoteActivity extends AppCompatActivity {
         if(mIsNewNote)
             createNewNote();
 //        Log.i(TAG, "mNotePosition: " + mNote);
-        mNote = NoteManager.getNoteInstance().getmNotes().get(mNotePosition);
+        mNote = NoteManager.getNoteInstance().getNotes().get(mNotePosition);
     }
 
     @Override
@@ -117,10 +161,13 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNotePosition = nm.createNewNote();
     }
 
-    private void displayNote(EditText mPreacherName, EditText mNoteTitle, EditText mNoteText) {
-        mNoteTitle.setText(mNote.getnTitle());
-        mPreacherName.setText(mNote.getpName());
-        mNoteText.setText(mNote.getnText());
+    private void displayNote() {
+        String noteTitle = mBibleNoteCursor.getString(mNoteTitlePos);
+        String noteText = mBibleNoteCursor.getString(mNoteTextPos);
+        String sermorner = mBibleNoteCursor.getString(mSermornerPos);
+        mNoteTitle.setText(noteTitle);
+        mPreacherName.setText(noteText);
+        mNoteText.setText(sermorner);
     }
 
     private void saveNoteValues(){
@@ -129,6 +176,12 @@ public class BibleNoteActivity extends AppCompatActivity {
         mPutPreacherName = mNote.getpName();
         mPutNoteTitle = mNote.getnTitle();
         mPutNoteText = mNote.getnText();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mDbHelper.close();
+        super.onDestroy();
     }
 
     @Override
