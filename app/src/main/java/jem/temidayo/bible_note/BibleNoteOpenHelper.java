@@ -4,12 +4,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-public class DatabaseOpenHelper extends SQLiteOpenHelper {
+public class BibleNoteOpenHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "BibleNote.db";
     public static  final int DATABASE_VERSION = 1;
+    private static final String TAG = ListNoteActivity.class.getSimpleName();
 
-    public DatabaseOpenHelper(Context context) {
+    public BibleNoteOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -18,6 +20,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         db.execSQL(BibleNoteDatabaseContract.BibleNoteEntry.SQL_CREATE_TABLE);
         DatabaseDataWorker worker = new DatabaseDataWorker(db);
         worker.insertSampleNotes();
+//        Log.e(TAG, "worker:"+ db);
     }
 
     @Override

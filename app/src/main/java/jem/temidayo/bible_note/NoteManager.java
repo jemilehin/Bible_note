@@ -1,8 +1,13 @@
 package jem.temidayo.bible_note;
 
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
 public class NoteManager {
     private static NoteManager noteInstance = null;
@@ -12,7 +17,7 @@ public class NoteManager {
     public static NoteManager getNoteInstance() {
         if(noteInstance == null) {
             noteInstance = new NoteManager();
-            noteInstance.intilizeExampleNotes();
+//            noteInstance.intilizeExampleNotes();
         }
         return noteInstance;
     }
@@ -21,11 +26,44 @@ public class NoteManager {
         return notes;
     }
 
+    public static void loadFromDatabase(BibleNoteOpenHelper dbHelper){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        final String[] noteColumns = {BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+                BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
+                BibleNoteEntry.COLUMN_SERMONER};
+
+        final Cursor noteCursor = db.query(BibleNoteEntry.TABLE_NAME, noteColumns,
+                null, null, null, null, null
+        );
+
+        loadNotesFromDatabase(noteCursor);
+    }
+
+    private static void loadNotesFromDatabase(Cursor cursor) {
+        int noteTitlePos = cursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
+        int noteTextPos = cursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
+        int noteSermonerPos = cursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
+
+        NoteManager nm = getNoteInstance();
+        nm.notes.clear();
+        while(cursor.moveToNext()){
+            String noteTitle = cursor.getString(noteTitlePos);
+            String noteText = cursor.getString(noteTextPos);
+            String noteSermoner = cursor.getString(noteSermonerPos);
+
+            BibleNote nwNote = new BibleNote(noteSermoner,noteTitle,noteText);
+            nm.notes.add(nwNote);
+        }
+        cursor.close();
+    }
+
+
     public int createNewNote(){
         BibleNote note = new BibleNote(null,null,null);
         notes.add(note);
         return notes.size() - 1;
     }
+
 
     private void intilizeExampleNotes() {
         final NoteManager nm = getNoteInstance();
