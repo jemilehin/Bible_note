@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,11 +16,11 @@ import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
 public class BibleNoteActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
-    public static  final String NOTE_POSITION = "jem.temidayo.bible_note.NOTE_POSITION";
+    public static  final String NOTE_ID = "jem.temidayo.bible_note.NOTE_ID";
     public static final String BIBLE_NOTE_PREACHER = "jem.temidayo.bible_note.BIBLE_NOTE_PREACHER";
     public static final String BIBLE_NOTE_TITLE = "jem.temidayo.bible_note.BIBLE_NOTE_TITLE";
     public static final String BIBLE_NOTE_TEXT = "jem.temidayo.bible_note.BIBLE_NOTE_TEXT";
-    public static  final int POSITION_NOT_SET = -1;
+    public static  final int ID_NOT_SET = -1;
     private EditText mPreacherName, mNoteTitle, mNoteText;
     private String mPutPreacherName, mPutNoteTitle, mPutNoteText;
     private boolean mIsNewNote;
@@ -30,10 +31,10 @@ public class BibleNoteActivity extends AppCompatActivity {
     private Button sButton, cButton;
     private BibleNoteOpenHelper mDbHelper;
     private Cursor mBibleNoteCursor;
-    private int mNoteTitlePos;
     private int mNoteTextPos;
+    private int mNoteTitlePos;
     private int mSermornerPos;
-
+    private int noteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,9 @@ public class BibleNoteActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(mIsCancelling){
                     if(mIsNewNote){
-                        
+                        NoteManager.getNoteInstance().removeNote(mNotePosition);
+                    }else {
+                        storePreviousNoteValues();
                     }
                 }
                 finish();
@@ -83,14 +86,8 @@ public class BibleNoteActivity extends AppCompatActivity {
     private void loadNoteData() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        String noteTitle = "Serving God";
-        String noteTextStart = "God";
-//        int noteId = 2;
-
-        String selection = BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE + "= ? AND "
-                + BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT + " LIKE ? ";
-//        String selection = BibleNoteEntry._ID;
-        String[] selectionArgs = {noteTitle, noteTextStart + "%"};
+        String selection = BibleNoteEntry._ID + " = ?";
+        String[] selectionArgs = {Integer.toString(noteId)};
 
         String[] bibleNoteColumn= {
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
@@ -104,7 +101,6 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
         mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
         mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
-
         displayNote();
     }
 
@@ -116,12 +112,12 @@ public class BibleNoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        mNotePosition = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = mNotePosition == POSITION_NOT_SET;
+        noteId = intent.getIntExtra(NOTE_ID, ID_NOT_SET);
+        mIsNewNote = noteId == ID_NOT_SET;
         if(mIsNewNote)
             createNewNote();
-//        Log.i(TAG, "mNotePosition: " + mNote);
-        mNote = NoteManager.getNoteInstance().getNotes().get(mNotePosition);
+        Log.i(TAG, "noteId: " + noteId);
+//        mNote = NoteManager.getNoteInstance().getNotes().get(noteId);
     }
 
     @Override
@@ -158,7 +154,7 @@ public class BibleNoteActivity extends AppCompatActivity {
 
     private void createNewNote() {
         NoteManager nm = NoteManager.getNoteInstance();
-        mNotePosition = nm.createNewNote();
+        noteId = nm.createNewNote();
     }
 
     private void displayNote() {
