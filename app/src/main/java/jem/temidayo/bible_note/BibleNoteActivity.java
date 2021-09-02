@@ -20,14 +20,12 @@ public class BibleNoteActivity extends AppCompatActivity {
     public static final String BIBLE_NOTE_PREACHER = "jem.temidayo.bible_note.BIBLE_NOTE_PREACHER";
     public static final String BIBLE_NOTE_TITLE = "jem.temidayo.bible_note.BIBLE_NOTE_TITLE";
     public static final String BIBLE_NOTE_TEXT = "jem.temidayo.bible_note.BIBLE_NOTE_TEXT";
-    public static  final int ID_NOT_SET = -1;
+    public static final int ID_NOT_SET = -1;
     private EditText mPreacherName, mNoteTitle, mNoteText;
     private String mPutPreacherName, mPutNoteTitle, mPutNoteText;
     private boolean mIsNewNote;
     private boolean mIsCancelling;
-    private int mNotePosition;
-    private BibleNote mNote;
-    private MenuItem menu;
+//    private MenuItem menu;
     private Button sButton, cButton;
     private BibleNoteOpenHelper mDbHelper;
     private Cursor mBibleNoteCursor;
@@ -35,6 +33,7 @@ public class BibleNoteActivity extends AppCompatActivity {
     private int mNoteTitlePos;
     private int mSermornerPos;
     private int noteId;
+    private BibleNote mNote = new BibleNote("", "","");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +72,7 @@ public class BibleNoteActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(mIsCancelling){
                     if(mIsNewNote){
-                        NoteManager.getNoteInstance().removeNote(mNotePosition);
+                        NoteManager.getNoteInstance().removeNote(noteId);
                     }else {
                         storePreviousNoteValues();
                     }
@@ -101,7 +100,11 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
         mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
         mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
-        displayNote();
+        if(mBibleNoteCursor != null){
+            while(mBibleNoteCursor.moveToNext()){
+                displayNote();
+            }
+        }
     }
 
     private void restoreOriginalNoteValues(Bundle savedInstanceState) {
@@ -125,7 +128,7 @@ public class BibleNoteActivity extends AppCompatActivity {
         super.onPause();
         if(mIsCancelling){
             if(mIsNewNote){
-                NoteManager.getNoteInstance().removeNote(mNotePosition);
+                NoteManager.getNoteInstance().removeNote(noteId);
             }else{
                 storePreviousNoteValues();
             }
@@ -162,8 +165,8 @@ public class BibleNoteActivity extends AppCompatActivity {
         String noteText = mBibleNoteCursor.getString(mNoteTextPos);
         String sermorner = mBibleNoteCursor.getString(mSermornerPos);
         mNoteTitle.setText(noteTitle);
-        mPreacherName.setText(noteText);
-        mNoteText.setText(sermorner);
+        mPreacherName.setText(sermorner);
+        mNoteText.setText(noteText);
     }
 
     private void saveNoteValues(){

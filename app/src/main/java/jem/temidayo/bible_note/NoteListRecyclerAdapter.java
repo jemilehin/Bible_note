@@ -3,6 +3,7 @@ package jem.temidayo.bible_note;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,9 +18,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
     private final List<BibleNote> bibleNotelist;
     private final Context mContext;
     private final LayoutInflater mLayoutInflater;
-//    private Cursor mCursor;
     private int mBibleNotePos;
-//    private NoteListRecyclerAdapter mAdapter;
 
     public NoteListRecyclerAdapter(Context context, List<BibleNote> bibleNotes) {
         mContext = context;
@@ -103,7 +102,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView nTitle, nText, pName;
+        public final TextView nTitle, nText, pName;
         public int mId;
         public CardView viewForeground;
 
@@ -114,13 +113,10 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
             pName = (TextView) view.findViewById(R.id.preacher_name);
             viewForeground = view.findViewById(R.id.note_item);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(mContext, BibleNoteActivity.class);
-                    intent.putExtra(BibleNoteActivity.NOTE_ID, mId);
-                    mContext.startActivity(intent);
-                }
+            itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(mContext, BibleNoteActivity.class);
+                intent.putExtra(BibleNoteActivity.NOTE_ID, mId);
+                mContext.startActivity(intent);
             });
         }
     }
