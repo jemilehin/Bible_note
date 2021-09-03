@@ -1,10 +1,10 @@
- package jem.temidayo.bible_note;
+package jem.temidayo.bible_note;
 
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +40,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         holder.nTitle.setText(bibleNote.getnTitle());
         holder.nText.setText(bibleNote.getnText());
         holder.pName.setText(bibleNote.getpName());
-        holder.mId =  bibleNote.getnId();
+        holder.mId =  bibleNote.getNoteId();
     }
 
     @Override
