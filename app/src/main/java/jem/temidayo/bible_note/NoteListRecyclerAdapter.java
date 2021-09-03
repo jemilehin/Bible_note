@@ -1,19 +1,16 @@
-package jem.temidayo.bible_note;
+ package jem.temidayo.bible_note;
 
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
-
-import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
 public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecyclerAdapter.ViewHolder>{
 
@@ -43,7 +40,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         holder.nTitle.setText(bibleNote.getnTitle());
         holder.nText.setText(bibleNote.getnText());
         holder.pName.setText(bibleNote.getpName());
-        holder.mCurrentPosition =  holder.getAdapterPosition();
+        holder.mId =  bibleNote.getnId();
     }
 
     @Override
@@ -107,7 +104,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView nTitle, nText, pName;
-        public int mCurrentPosition;
+        public int mId;
         public CardView viewForeground;
 
         public ViewHolder(View view) {
@@ -121,7 +118,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, BibleNoteActivity.class);
-                    intent.putExtra(BibleNoteActivity.NOTE_POSITION, mCurrentPosition);
+                    intent.putExtra(BibleNoteActivity.NOTE_ID, mId);
                     mContext.startActivity(intent);
                 }
             });

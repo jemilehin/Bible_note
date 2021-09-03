@@ -3,7 +3,7 @@ package jem.temidayo.bible_note;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,16 +15,16 @@ import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
 public class BibleNoteActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
-    public static  final String NOTE_POSITION = "jem.temidayo.bible_note.NOTE_POSITION";
+    public static  final String NOTE_ID = "jem.temidayo.bible_note.NOTE_POSITION";
     public static final String BIBLE_NOTE_PREACHER = "jem.temidayo.bible_note.BIBLE_NOTE_PREACHER";
     public static final String BIBLE_NOTE_TITLE = "jem.temidayo.bible_note.BIBLE_NOTE_TITLE";
     public static final String BIBLE_NOTE_TEXT = "jem.temidayo.bible_note.BIBLE_NOTE_TEXT";
-    public static  final int POSITION_NOT_SET = -1;
+    public static  final int ID_NOT_SET = -1;
     private EditText mPreacherName, mNoteTitle, mNoteText;
     private String mPutPreacherName, mPutNoteTitle, mPutNoteText;
     private boolean mIsNewNote;
     private boolean mIsCancelling;
-    private int mNotePosition;
+    private int mNoteId;
     private BibleNote mNote;
     private MenuItem menu;
     private Button sButton, cButton;
@@ -83,14 +83,13 @@ public class BibleNoteActivity extends AppCompatActivity {
     private void loadNoteData() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        String noteTitle = "Serving God";
-        String noteTextStart = "God";
+//        String noteTitle = "Serving God";
+//        String noteTextStart = "God";
 //        int noteId = 2;
 
-        String selection = BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE + "= ? AND "
-                + BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT + " LIKE ? ";
-//        String selection = BibleNoteEntry._ID;
-        String[] selectionArgs = {noteTitle, noteTextStart + "%"};
+        String selection = BibleNoteEntry._ID + "= ?";
+
+        String[] selectionArgs = {Integer.toString(mNoteId)};
 
         String[] bibleNoteColumn= {
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
@@ -116,12 +115,12 @@ public class BibleNoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        mNotePosition = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = mNotePosition == POSITION_NOT_SET;
+        mNoteId = intent.getIntExtra(NOTE_ID, ID_NOT_SET);
+        mIsNewNote = mNoteId == ID_NOT_SET;
         if(mIsNewNote)
             createNewNote();
 //        Log.i(TAG, "mNotePosition: " + mNote);
-        mNote = NoteManager.getNoteInstance().getNotes().get(mNotePosition);
+//        mNote = NoteManager.getNoteInstance().getNotes().get(mNoteId);
     }
 
     @Override
@@ -129,7 +128,7 @@ public class BibleNoteActivity extends AppCompatActivity {
         super.onPause();
         if(mIsCancelling){
             if(mIsNewNote){
-                NoteManager.getNoteInstance().removeNote(mNotePosition);
+                NoteManager.getNoteInstance().removeNote(mNoteId);
             }else{
                 storePreviousNoteValues();
             }
@@ -158,7 +157,7 @@ public class BibleNoteActivity extends AppCompatActivity {
 
     private void createNewNote() {
         NoteManager nm = NoteManager.getNoteInstance();
-        mNotePosition = nm.createNewNote();
+        mNoteId = nm.createNewNote();
     }
 
     private void displayNote() {
