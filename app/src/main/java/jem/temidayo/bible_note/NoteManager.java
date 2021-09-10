@@ -17,7 +17,6 @@ public class NoteManager {
     public static NoteManager getNoteInstance() {
         if(noteInstance == null) {
             noteInstance = new NoteManager();
-//            noteInstance.intilizeExampleNotes();
         }
         return noteInstance;
     }
@@ -29,10 +28,10 @@ public class NoteManager {
     public static void loadFromDatabase(BibleNoteOpenHelper dbHelper){
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         final String[] noteColumns = {
+                BibleNoteEntry._ID,
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
-                BibleNoteEntry.COLUMN_SERMONER,
-                BibleNoteEntry._ID
+                BibleNoteEntry.COLUMN_SERMONER
         };
 
         final Cursor noteCursor = db.query(BibleNoteEntry.TABLE_NAME, noteColumns,

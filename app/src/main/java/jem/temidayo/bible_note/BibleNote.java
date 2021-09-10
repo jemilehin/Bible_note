@@ -7,8 +7,8 @@ public class BibleNote {
         return noteId;
     }
 
-    public void setNoteId(int noteId) {
-        this.noteId = noteId;
+    public void setNoteId(int id) {
+        this.noteId = id;
     }
 
 

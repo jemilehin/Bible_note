@@ -3,7 +3,8 @@ package jem.temidayo.bible_note;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -70,13 +71,13 @@ public class BibleNoteActivity extends AppCompatActivity {
         cButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mIsCancelling){
+//                if(mIsCancelling){
                     if(mIsNewNote){
                         NoteManager.getNoteInstance().removeNote(noteId);
                     }else {
                         storePreviousNoteValues();
                     }
-                }
+//                }
                 finish();
             }
         });
@@ -87,7 +88,7 @@ public class BibleNoteActivity extends AppCompatActivity {
 
         String selection = BibleNoteEntry._ID + " = ?";
         String[] selectionArgs = {Integer.toString(noteId)};
-
+//        Log.v("selected: ", Integer.toString(noteId));
         String[] bibleNoteColumn= {
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
                 BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
@@ -100,11 +101,8 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
         mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
         mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
-        if(mBibleNoteCursor != null){
-            while(mBibleNoteCursor.moveToNext()){
-                displayNote();
-            }
-        }
+        mBibleNoteCursor.moveToNext();
+        displayNote();
     }
 
     private void restoreOriginalNoteValues(Bundle savedInstanceState) {
@@ -188,5 +186,40 @@ public class BibleNoteActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menu.findItem(R.id.action_search).setVisible(false);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_forward:
+                moveNext();
+                return true;
+            case R.id.action_backward:
+                movePrev();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void movePrev() {
+        saveNote();
+        int id = --noteId;
+        mNote= NoteManager.getNoteInstance().getNotes().get(id);
+        saveNoteValues();
+        displayNote();
+        invalidateOptionsMenu();
+    }
+
+    private void moveNext() {
+        saveNote();
+
+        ++noteId;
+        mNote= NoteManager.getNoteInstance().getNotes().get(noteId);
+
+        Log.d("noteId: ", String.valueOf(mNote));
+        saveNoteValues();
+        displayNote();
+        invalidateOptionsMenu();
     }
 }

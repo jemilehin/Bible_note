@@ -3,7 +3,7 @@ package jem.temidayo.bible_note;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 public class BibleNoteOpenHelper extends SQLiteOpenHelper {
@@ -19,8 +19,8 @@ public class BibleNoteOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(BibleNoteDatabaseContract.BibleNoteEntry.SQL_CREATE_TABLE);
         DatabaseDataWorker worker = new DatabaseDataWorker(db);
-        worker.insertSampleNotes();
-//        Log.e(TAG, "worker:"+ db);
+//        worker.insertSampleNotes();
+//        Log.e(TAG, "worker:", worker);
     }
 
     @Override
