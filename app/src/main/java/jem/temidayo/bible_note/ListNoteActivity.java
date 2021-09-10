@@ -1,25 +1,29 @@
 package jem.temidayo.bible_note;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
 
 import android.view.Menu;
-import android.view.MenuItem;
 
-import java.util.List;
+import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
-public class ListNoteActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+public class ListNoteActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, LoaderManager.LoaderCallbacks<Cursor> {
+
+    public static  final int LOADER_NOTES = 0;
     private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
     private BibleNoteOpenHelper mOpenHelper;
@@ -58,8 +62,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         LinearLayoutManager noteLayoutManager = new LinearLayoutManager(this);
         recyclerNotes.setLayoutManager(noteLayoutManager);
 
-        List<BibleNote> mNotes = NoteManager.getNoteInstance().getNotes();
-        noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, mNotes);
+//        List<BibleNote> mNotes = NoteManager.getNoteInstance().getNotes();
+        noteListRecyclerAdapter = new NoteListRecyclerAdapter(this, null);
         recyclerNotes.setItemAnimator(new DefaultItemAnimator());
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
 
@@ -71,30 +75,44 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        loadNotes();
         noteListRecyclerAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_backward) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    private void loadNotes() {
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        final String[] noteColumns = {
+                BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+                BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
+                BibleNoteEntry.COLUMN_SERMONER,
+                BibleNoteEntry._ID
+        };
+        final Cursor noteCursor = db.query(BibleNoteEntry.TABLE_NAME, noteColumns,null,null,
+                null,null,null);
+        noteListRecyclerAdapter.changeCursor(noteCursor);
     }
+
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_backward) {
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @Override
     public void onItemSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
@@ -120,5 +138,38 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
             // undo is selected, restore the deleted item
 //                    mAdapter.restoreItem(deletedItem, deletedIndex);
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        CursorLoader loader = null;
+        if(id == LOADER_NOTES){
+           loader = new CursorLoader(this){
+                @Override
+                public Cursor loadInBackground() {
+                    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    final String[] noteColumns = {
+                            BibleNoteEntry._ID, BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+                            BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT, BibleNoteEntry.COLUMN_SERMONER
+                    };
+
+                    return db.query(BibleNoteEntry.TABLE_NAME, noteColumns,null,null,null,
+                            null,null);
+                }
+            };
+        }
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if(loader.getId() == LOADER_NOTES)
+            noteListRecyclerAdapter.changeCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if(loader.getId() == LOADER_NOTES)
+            noteListRecyclerAdapter.changeCursor(null);
     }
 }
