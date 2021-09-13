@@ -2,22 +2,28 @@ package jem.temidayo.bible_note;
 
 public class BibleNote {
     private String pName,  nTitle,  nText;
-
-    public Integer getNoteId() {
+    private int noteId;
+    public int getNoteId() {
         return noteId;
     }
 
-    public void setNoteId(Integer noteId) {
-        this.noteId = noteId;
+    public void setNoteId(int id) {
+        this.noteId = id;
     }
 
-    private Integer noteId;
+
 
     public BibleNote(Integer nId, String pName, String nTitle, String nText) {
         this.pName = pName;
         this.nTitle = nTitle;
         this.nText = nText;
         this.noteId = nId;
+    }
+
+    public BibleNote(String sermoner, String title, String text){
+        nTitle = title;
+        nText = text;
+        pName = sermoner;
     }
 
     public String getpName() {
