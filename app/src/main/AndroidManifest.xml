@@ -11,6 +11,7 @@
         android:theme="@style/Theme.Bible_note">
         <activity android:name=".BibleNoteActivity"></activity>
         <activity
+            android:exported="true"
             android:name=".ListNoteActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.Bible_note.NoActionBar">
