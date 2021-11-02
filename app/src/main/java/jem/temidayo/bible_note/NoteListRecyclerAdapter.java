@@ -7,6 +7,8 @@ import android.database.Cursor;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +27,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
     private int mSermornerPos;
     private Cursor mCursor;
     private int mIdPos;
+    private SQLiteOpenHelper mDbHelper;
 
     public NoteListRecyclerAdapter(Context context, Cursor cursor) {
         mContext = context;
@@ -68,6 +71,7 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         holder.nText.setText(text);
         holder.pName.setText(sermoner);
         holder.mId = Id;
+        holder.itemView.setTag(Id);
     }
 
     @Override
@@ -75,55 +79,30 @@ public class NoteListRecyclerAdapter extends RecyclerView.Adapter<NoteListRecycl
         return mCursor == null ? 0 : mCursor.getCount();
     }
 
-//    @Override
-//    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
-//        if (viewHolder instanceof NoteListRecyclerAdapter.ViewHolder) {
-            // get the removed item name to display it in snack bar
-//            String name = bibleNotelist.get(viewHolder.getAdapterPosition()).getnTitle();
-
-            // backup of removed item for undo purpose
-//            final Item deletedItem = cartList.get(viewHolder.getAdapterPosition());
-//            final int deletedIndex = viewHolder.getAdapterPosition();
-
-            // remove the item from recycler view
-//            mAdapter.removeItem(viewHolder.getAdapterPosition());
-
-            // showing snack bar with Undo option
-//            Snackbar snackbar = Snackbar
-//                    .make(coordinatorLayout, name + " removed from cart!", Snackbar.LENGTH_LONG);
-//            snackbar.setAction("UNDO", new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-
-                    // undo is selected, restore the deleted item
-//                    mAdapter.restoreItem(deletedItem, deletedIndex);
-//                }
-//            });
-//            snackbar.setActionTextColor(Color.YELLOW);
-//            snackbar.show();
-//        }
+//    public static void removeItem(int id) {
+//        // notify the item removed by position
+//        // to perform recycler view delete animations
+//        // NOTE: don't call notifyDataSetChanged()
+//        String selection = BibleNoteEntry._ID + "= ?";
+//        String[] selectionArgs = {Integer.toString(id)};
+//        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+//        db.delete(BibleNoteEntry.TABLE_NAME, selection, selectionArgs);
+//
+//        notifyItemRemoved(id);
 //    }
-
-    public void removeItem(int adapterPosition) {
-//        bibleNotelist.remove(adapterPosition);
-        // notify the item removed by position
-        // to perform recycler view delete animations
-        // NOTE: don't call notifyDataSetChanged()
-        notifyItemRemoved(adapterPosition);
-    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public final TextView nTitle, nText, pName;
         public int mId;
-        public CardView viewForeground;
+//        public CardView viewForeground;
 
         public ViewHolder(View view) {
             super(view);
             nTitle = (TextView) view.findViewById(R.id.note_title_text);
             nText = (TextView)  view.findViewById(R.id.note_bible_text);
             pName = (TextView) view.findViewById(R.id.preacher_name);
-            viewForeground = view.findViewById(R.id.note_item);
+//            viewForeground = view.findViewById(R.id.note_item);
 
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(mContext, BibleNoteActivity.class);

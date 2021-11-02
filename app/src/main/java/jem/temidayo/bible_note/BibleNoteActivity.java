@@ -1,10 +1,17 @@
 package jem.temidayo.bible_note;
 
+import android.app.LoaderManager;
+import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -15,7 +22,9 @@ import android.widget.EditText;
 
 import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
-public class BibleNoteActivity extends AppCompatActivity {
+public class BibleNoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>
+{
+    public static final int LOADER_NOTES = 0;
     private final String TAG = getClass().getSimpleName();
     public static  final String NOTE_ID = "jem.temidayo.bible_note.NOTE_ID";
     public static final String BIBLE_NOTE_PREACHER = "jem.temidayo.bible_note.BIBLE_NOTE_PREACHER";
@@ -55,55 +64,41 @@ public class BibleNoteActivity extends AppCompatActivity {
         mNoteText = findViewById(R.id.edit_text_note);
 
         if(!mIsNewNote){
-            loadNoteData();
+            getLoaderManager().initLoader(LOADER_NOTES, null,this);
         }
 
         sButton = findViewById(R.id.save_note);
-        sButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveNote();
-                startActivity(new Intent(BibleNoteActivity.this, ListNoteActivity.class));
-            }
-        });
+        sButton.setOnClickListener(v -> saveNote());
 
         cButton = findViewById(R.id.cancle_note);
-        cButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                if(mIsCancelling){
-                    if(mIsNewNote){
-                        NoteManager.getNoteInstance().removeNote(noteId);
-                    }else {
-                        storePreviousNoteValues();
-                    }
-//                }
+        cButton.setOnClickListener(v -> {
+                if(mIsNewNote){
+                    deleteNoteFromDatabase();
+                }
                 finish();
-            }
         });
     }
 
-    private void loadNoteData() {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-        String selection = BibleNoteEntry._ID + " = ?";
-        String[] selectionArgs = {Integer.toString(noteId)};
-//        Log.v("selected: ", Integer.toString(noteId));
-        String[] bibleNoteColumn= {
-                BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
-                BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
-                BibleNoteEntry.COLUMN_SERMONER
-        };
-
-        mBibleNoteCursor = db.query(BibleNoteEntry.TABLE_NAME,bibleNoteColumn,selection, selectionArgs,
-                null, null, null);
-
-        mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
-        mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
-        mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
-        mBibleNoteCursor.moveToNext();
-        displayNote();
-    }
+//    private void loadNoteData() {
+//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+//
+//        String selection = BibleNoteEntry._ID + " = ?";
+//        String[] selectionArgs = {Integer.toString(noteId)};
+//        String[] bibleNoteColumn= {
+//                BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+//                BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
+//                BibleNoteEntry.COLUMN_SERMONER
+//        };
+//
+//        mBibleNoteCursor = db.query(BibleNoteEntry.TABLE_NAME,bibleNoteColumn,selection, selectionArgs,
+//                null, null, null);
+//
+//        mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
+//        mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
+//        mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
+//        mBibleNoteCursor.moveToNext();
+//        displayNote();
+//    }
 
     private void restoreOriginalNoteValues(Bundle savedInstanceState) {
         mPutPreacherName = savedInstanceState.getString(BIBLE_NOTE_PREACHER);
@@ -117,20 +112,36 @@ public class BibleNoteActivity extends AppCompatActivity {
         mIsNewNote = noteId == ID_NOT_SET;
         if(mIsNewNote)
             createNewNote();
-        Log.i(TAG, "noteId: " + noteId);
+        Log.i(TAG, "noteId: "+ noteId);
 //        mNote = NoteManager.getNoteInstance().getNotes().get(noteId);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(mIsCancelling){
-            if(mIsNewNote){
-                NoteManager.getNoteInstance().removeNote(noteId);
-            }else{
-                storePreviousNoteValues();
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        if(mIsCancelling){
+//            if(mIsNewNote){
+//                deleteNoteFromDatabase();
+//            }else{
+//                storePreviousNoteValues();
+//            }
+//        }
+//    }
+
+    private void deleteNoteFromDatabase() {
+        final String selection = BibleNoteEntry._ID + "= ?";
+        final String[] selectionArgs = {Integer.toString(noteId)};
+
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                SQLiteDatabase db = mDbHelper.getWritableDatabase();
+                db.delete(BibleNoteEntry.TABLE_NAME, selection, selectionArgs);
+                return null;
             }
-        }
+        };
+
+        task.execute();
     }
 
     private void storePreviousNoteValues() {
@@ -148,14 +159,53 @@ public class BibleNoteActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        mNote.setpName(mPreacherName.getText().toString());
-        mNote.setnTitle(mNoteTitle.getText().toString());
-        mNote.setnText(mNoteText.getText().toString());
+        String preacherName = mPreacherName.getText().toString();
+        String noteTitle = mNoteTitle.getText().toString();
+        String noteText = mNoteText.getText().toString();
+
+        saveNoteToDatabase(noteTitle,noteText,preacherName);
+    }
+
+    private void saveNoteToDatabase(String noteTitle, String noteText, String sermorner){
+        final String selection = BibleNoteEntry._ID + "= ?";
+        final String[] selectionArgs = {Integer.toString(noteId)};
+
+        final ContentValues values = new ContentValues();
+        values.put(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE, noteTitle);
+        values.put(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT, noteText);
+        values.put(BibleNoteEntry.COLUMN_SERMONER, sermorner);
+
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                SQLiteDatabase db = mDbHelper.getWritableDatabase();
+                db.update(BibleNoteEntry.TABLE_NAME,values, selection, selectionArgs);
+                return null;
+            }
+        };
+
+        task.execute();
+
+        startActivity(new Intent(BibleNoteActivity.this, ListNoteActivity.class));
     }
 
     private void createNewNote() {
-        NoteManager nm = NoteManager.getNoteInstance();
-        noteId = nm.createNewNote();
+        final ContentValues values = new ContentValues();
+        values.put(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE, "");
+        values.put(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT, "");
+        values.put(BibleNoteEntry.COLUMN_SERMONER, "");
+
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                SQLiteDatabase db = mDbHelper.getWritableDatabase();
+                noteId = (int) db.insert(BibleNoteEntry.TABLE_NAME,null,values);
+                return null;
+            }
+        };
+
+        task.execute();
+
     }
 
     private void displayNote() {
@@ -190,15 +240,25 @@ public class BibleNoteActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_forward:
-                moveNext();
-                return true;
-            case R.id.action_backward:
-                movePrev();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+//        switch (item.getItemId()){
+//            case R.id.action_forward:
+//                moveNext();
+//                return true;
+//            case R.id.action_backward:
+//                movePrev();
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+        if(item.getItemId() == R.id.action_forward){
+            moveNext();
+            return true;
+        }
+        if(item.getItemId() == R.id.action_backward){
+            movePrev();
+            return true;
+        }else{
+            return  super.onOptionsItemSelected(item);
         }
     }
 
@@ -221,5 +281,52 @@ public class BibleNoteActivity extends AppCompatActivity {
         saveNoteValues();
         displayNote();
         invalidateOptionsMenu();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        CursorLoader loader = null;
+        if(id == LOADER_NOTES)
+            loader = createLoaderNotes();
+        return loader;
+    }
+
+    private CursorLoader createLoaderNotes() {
+        return new CursorLoader(this){
+            @Override
+            public Cursor loadInBackground() {
+                SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+                String selection = BibleNoteEntry._ID + " = ?";
+                String[] selectionArgs = {Integer.toString(noteId)};
+                String[] bibleNoteColumn= {
+                        BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE,
+                        BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT,
+                        BibleNoteEntry.COLUMN_SERMONER
+                };
+
+                return db.query(BibleNoteEntry.TABLE_NAME,bibleNoteColumn,selection, selectionArgs,
+                        null, null, null);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mBibleNoteCursor = data;
+        mNoteTitlePos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TITLE);
+        mNoteTextPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_BIBLE_NOTE_TEXT);
+        mSermornerPos = mBibleNoteCursor.getColumnIndex(BibleNoteEntry.COLUMN_SERMONER);
+        mBibleNoteCursor.moveToNext();
+        displayNote();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+         if(loader.getId() == LOADER_NOTES) {
+             if (mBibleNoteCursor != null) {
+                 mBibleNoteCursor.close();
+             }
+         }
     }
 }

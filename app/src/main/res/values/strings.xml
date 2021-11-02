@@ -17,4 +17,7 @@
     <string name="edit_text_note_label">Type Notes Here</string>
     <string name="save_note_button_text">Save</string>
     <string name="cancle_note_button_text">Cancle</string>
+    <string name="sermoner_hint">Sermoner\'s name</string>
+    <string name="title_hint">Note title</string>
+    <string name="note_text_hint">Note text</string>
 </resources>

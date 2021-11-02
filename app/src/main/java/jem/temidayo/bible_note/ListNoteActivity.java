@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,19 +19,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import android.view.Menu;
 
 import jem.temidayo.bible_note.BibleNoteDatabaseContract.BibleNoteEntry;
 
-public class ListNoteActivity extends AppCompatActivity implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class ListNoteActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static  final int LOADER_NOTES = 0;
     private RecyclerView recyclerNotes;
     private NoteListRecyclerAdapter noteListRecyclerAdapter;
     private BibleNoteOpenHelper mOpenHelper;
     private static final String TAG = ListNoteActivity.class.getSimpleName();
+//    private SQLiteOpenHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +73,39 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
         recyclerNotes.setItemAnimator(new DefaultItemAnimator());
         recyclerNotes.setAdapter(noteListRecyclerAdapter);
 
-        ItemTouchHelper.SimpleCallback itemTouchCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, this);
-        new ItemTouchHelper(itemTouchCallback).attachToRecyclerView(recyclerNotes);
+//        ItemTouchHelper.SimpleCallback itemTouchCallback = new RecyclerItemTouchHelper(0,ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT, this);
+//        new ItemTouchHelper(itemTouchCallback).attachToRecyclerView(recyclerNotes)
 
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                removeItem((int) viewHolder.itemView.getTag());
+            }
+        }).attachToRecyclerView(recyclerNotes);
+    }
+
+    private void removeItem(int id) {
+        final String selection = BibleNoteEntry._ID + "= ?";
+        final String[] selectionArgs = {Integer.toString(id)};
+
+        AsyncTask task = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                db.delete(BibleNoteEntry.TABLE_NAME, selection, selectionArgs);
+                return null;
+            }
+        };
+
+        task.execute();
+
+        getLoaderManager().restartLoader(LOADER_NOTES, null, this);
+        noteListRecyclerAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -82,7 +118,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
     @Override
     protected void onResume() {
         super.onResume();
-        loadNotes();
+//        loadNotes();
+        getLoaderManager().restartLoader(LOADER_NOTES, null, this);
         noteListRecyclerAdapter.notifyDataSetChanged();
     }
 
@@ -114,19 +151,20 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
 //        return super.onOptionsItemSelected(item);
 //    }
 
-    @Override
-    public void onItemSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
-        if (viewHolder instanceof NoteListRecyclerAdapter.ViewHolder) {
+//    @Override
+//    public void onItemSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+//        if (viewHolder instanceof NoteListRecyclerAdapter.ViewHolder) {
             // get the removed item name to display it in snack bar
 //            String name = mNotes.get(viewHolder.getAdapterPosition()).getnTitle();
 
             // backup of removed item for undo purpose
 //            final BibleNote deletedItem = cartList.get(viewHolder.getAdapterPosition());
 //            final int deletedIndex = viewHolder.getAdapterPosition();
-            Log.d(TAG, "the id:"+ viewHolder.getItemId());
+//            Log.d(TAG, "the id:"+ viewHolder.getItemId());
+//            Log.d(TAG, "the id:"+ viewHolder.getAdapterPosition());
 
             // remove the item from recycler view
-            noteListRecyclerAdapter.removeItem(viewHolder.getAdapterPosition());
+//            noteListRecyclerAdapter.removeItem(viewHolder.getAdapterPosition());
 
             // showing snack bar with Undo option
 //            Snackbar snackbar = Snackbar
@@ -137,8 +175,8 @@ public class ListNoteActivity extends AppCompatActivity implements RecyclerItemT
 
             // undo is selected, restore the deleted item
 //                    mAdapter.restoreItem(deletedItem, deletedIndex);
-        }
-    }
+//        }
+//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
